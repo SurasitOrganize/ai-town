@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
 import { AddAgentModal } from './AddAgentModal';
+import { SignOutButton } from './SignOutButton';
 
 export function TeamSidebar() {
   const agents = useStore((state) => state.agents);
@@ -74,6 +75,7 @@ export function TeamSidebar() {
           <button className="w-full text-left text-white hover:bg-gray-700 py-2 px-3 rounded text-sm transition-colors">
             ⚙️ Settings
           </button>
+          <SignOutButton />
         </div>
       </div>
     </div>
