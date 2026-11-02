@@ -10,7 +10,7 @@ export function TaskPanel() {
   const { selectedAgent, chatMessages, addChatMessage, isChatOpen } = useStore();
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !selectedAgent) return;
 
     const userMessage = {
       id: Date.now().toString(),
@@ -20,6 +20,18 @@ export function TaskPanel() {
     };
 
     addChatMessage(userMessage);
+    
+    // Persist to Supabase if configured
+    const { isSupabaseConfigured } = await import('@/lib/supabase/client');
+    if (isSupabaseConfigured()) {
+      const { chatRepository } = await import('@/lib/repository/supabase');
+      try {
+        await chatRepository.addMessage(selectedAgent.id, userMessage);
+      } catch (err) {
+        console.error('Failed to persist user message:', err);
+      }
+    }
+
     setInput('');
     setIsLoading(true);
 
@@ -50,6 +62,16 @@ export function TaskPanel() {
       };
 
       addChatMessage(agentMessage);
+      
+      // Persist agent response to Supabase if configured
+      if (isSupabaseConfigured()) {
+        const { chatRepository } = await import('@/lib/repository/supabase');
+        try {
+          await chatRepository.addMessage(selectedAgent.id, agentMessage);
+        } catch (err) {
+          console.error('Failed to persist agent message:', err);
+        }
+      }
     } catch (error) {
       console.error('Error calling LLM:', error);
       const errorMessage = {

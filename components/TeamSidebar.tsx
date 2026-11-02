@@ -1,9 +1,19 @@
 "use client";
 
+import { useState } from 'react';
 import { useStore } from '@/lib/store';
+import { AddAgentModal } from './AddAgentModal';
 
 export function TeamSidebar() {
   const agents = useStore((state) => state.agents);
+  const selectAgent = useStore((state) => state.selectAgent);
+  const toggleChat = useStore((state) => state.toggleChat);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  
+  const handleAgentClick = (agent: any) => {
+    selectAgent(agent);
+    toggleChat(true);
+  };
   
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -15,6 +25,7 @@ export function TeamSidebar() {
   };
 
   return (
+    <>
     <div className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
       {/* Header */}
       <div className="p-4 border-b border-gray-700">
@@ -26,6 +37,7 @@ export function TeamSidebar() {
         {agents.map((agent) => (
           <div
             key={agent.id}
+            onClick={() => handleAgentClick(agent)}
             className="p-3 border-b border-gray-700 hover:bg-gray-700 cursor-pointer transition-colors"
           >
             <div className="flex items-center space-x-3">
@@ -44,7 +56,10 @@ export function TeamSidebar() {
 
       {/* Add Agent Button */}
       <div className="p-4 border-t border-gray-700">
-        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors">
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition-colors"
+        >
           + Add Agent
         </button>
       </div>
@@ -62,5 +77,11 @@ export function TeamSidebar() {
         </div>
       </div>
     </div>
+
+    <AddAgentModal
+      isOpen={isAddModalOpen}
+      onClose={() => setIsAddModalOpen(false)}
+    />
+  </>
   );
 }
