@@ -1,23 +1,31 @@
 import { supabase, isSupabaseConfigured } from './client';
 
-export async function signInAnonymously() {
+export async function signInWithPassword(email: string, password: string) {
   if (!isSupabaseConfigured() || !supabase) {
-    console.warn('Supabase not configured, skipping authentication');
-    return { error: null, session: null };
+    throw new Error('Supabase not configured');
   }
 
-  try {
-    const { data, error } = await supabase.auth.signInAnonymously();
-    
-    if (error) {
-      console.error('Anonymous sign-in error:', error);
-      return { error, session: null };
-    }
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-    return { error: null, session: data.session };
-  } catch (err) {
-    console.error('Anonymous sign-in exception:', err);
-    return { error: err as Error, session: null };
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function signOut() {
+  if (!isSupabaseConfigured() || !supabase) {
+    throw new Error('Supabase not configured');
+  }
+
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    throw error;
   }
 }
 

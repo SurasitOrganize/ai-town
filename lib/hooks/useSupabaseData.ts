@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { supabase, isSupabaseConfigured } from '../supabase/client';
 import { useStore } from '../store';
-import { signInAnonymously } from '../supabase/auth';
+import { getSession } from '../supabase/auth';
 import { agentRepository, taskRepository } from '../repository/supabase';
 
 export function useSupabaseData() {
@@ -18,10 +18,10 @@ export function useSupabaseData() {
 
     async function initialize() {
       try {
-        // Sign in anonymously
-        const { error } = await signInAnonymously();
-        if (error) {
-          console.error('Failed to sign in:', error);
+        // Check if user is authenticated
+        const session = await getSession();
+        if (!session) {
+          console.warn('No active session, skipping data load');
           return;
         }
 
