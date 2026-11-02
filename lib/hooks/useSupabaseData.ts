@@ -18,8 +18,16 @@ export function useSupabaseData() {
 
     async function initialize() {
       try {
-        // Check if user is authenticated
-        const session = await getSession();
+        // Check if user is authenticated (or try anonymous if allowed)
+        let session = await getSession();
+        
+        if (!session && process.env.NEXT_PUBLIC_ALLOW_ANON_SIGNIN === 'true') {
+          // Try anonymous sign-in if no session and it's allowed
+          const { signInAnonymously } = await import('../supabase/auth');
+          const { session: anonSession } = await signInAnonymously();
+          session = anonSession;
+        }
+        
         if (!session) {
           console.warn('No active session, skipping data load');
           return;

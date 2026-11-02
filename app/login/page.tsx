@@ -11,6 +11,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const allowAnonSignin = process.env.NEXT_PUBLIC_ALLOW_ANON_SIGNIN === 'true';
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -27,6 +29,35 @@ export default function LoginPage() {
         email,
         password,
       });
+
+      if (signInError) {
+        setError(signInError.message);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.session) {
+        router.push('/');
+        router.refresh();
+      }
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred');
+      setIsLoading(false);
+    }
+  };
+
+  const handleGuestSignIn = async () => {
+    setError(null);
+    setIsLoading(true);
+
+    if (!isSupabaseConfigured() || !supabase) {
+      setError('Authentication is not configured');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error: signInError } = await supabase.auth.signInAnonymously();
 
       if (signInError) {
         setError(signInError.message);
@@ -99,6 +130,27 @@ export default function LoginPage() {
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+
+        {allowAnonSignin && (
+          <div className="mt-4">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-700"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-gray-800 text-gray-400">Or</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleGuestSignIn}
+              disabled={isLoading}
+              className="mt-4 w-full bg-gray-700 hover:bg-gray-600 disabled:bg-gray-700 disabled:opacity-50 text-white font-medium py-3 px-4 rounded transition-colors"
+            >
+              Continue as Guest
+            </button>
+          </div>
+        )}
 
         <div className="mt-6 text-center text-gray-400 text-sm">
           <p>Need access? Contact your administrator.</p>

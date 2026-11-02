@@ -2,7 +2,12 @@
 
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
-import { createLLMProvider, LLMMessage } from '@/lib/llm';
+import { supabase } from '@/lib/supabase/client';
+
+interface LLMMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
 
 export function TaskPanel() {
   const [input, setInput] = useState('');
@@ -36,7 +41,15 @@ export function TaskPanel() {
     setIsLoading(true);
 
     try {
-      const llmProvider = createLLMProvider();
+      // Get auth token
+      const session = supabase ? await supabase.auth.getSession() : null;
+      const token = session?.data?.session?.access_token;
+
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
+      // Prepare messages for API
       const messages: LLMMessage[] = [
         {
           role: 'system',
@@ -52,7 +65,22 @@ export function TaskPanel() {
         },
       ];
 
-      const response = await llmProvider.chat(messages);
+      // Call server-side API
+      const apiResponse = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ messages }),
+      });
+
+      if (!apiResponse.ok) {
+        const errorData = await apiResponse.json();
+        throw new Error(errorData.error || 'Failed to get response');
+      }
+
+      const response = await apiResponse.json();
       
       const agentMessage = {
         id: (Date.now() + 1).toString(),

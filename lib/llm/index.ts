@@ -9,14 +9,14 @@ import { OllamaProvider } from './providers/ollama';
 export * from './types';
 
 export function createLLMProvider(config?: Partial<LLMConfig>): LLMProvider {
-  const provider = config?.provider || process.env.NEXT_PUBLIC_LLM_PROVIDER || 'mock';
-  const model = config?.model || process.env.NEXT_PUBLIC_LLM_MODEL || 'gpt-3.5-turbo';
+  const provider = config?.provider || process.env.LLM_PROVIDER || 'mock';
+  const model = config?.model || process.env.LLM_MODEL || 'gpt-3.5-turbo';
   const apiKey = config?.apiKey;
   const baseUrl = config?.baseUrl;
 
   switch (provider) {
     case 'openai': {
-      const key = apiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+      const key = apiKey || process.env.OPENAI_API_KEY;
       if (!key) {
         console.warn('No OpenAI API key found, falling back to mock provider');
         return new MockLLMProvider();
@@ -25,7 +25,7 @@ export function createLLMProvider(config?: Partial<LLMConfig>): LLMProvider {
     }
 
     case 'gemini': {
-      const key = apiKey || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      const key = apiKey || process.env.GEMINI_API_KEY;
       if (!key) {
         console.warn('No Gemini API key found, falling back to mock provider');
         return new MockLLMProvider();
@@ -34,7 +34,7 @@ export function createLLMProvider(config?: Partial<LLMConfig>): LLMProvider {
     }
 
     case 'groq': {
-      const key = apiKey || process.env.NEXT_PUBLIC_GROQ_API_KEY;
+      const key = apiKey || process.env.GROQ_API_KEY;
       if (!key) {
         console.warn('No Groq API key found, falling back to mock provider');
         return new MockLLMProvider();
@@ -43,7 +43,7 @@ export function createLLMProvider(config?: Partial<LLMConfig>): LLMProvider {
     }
 
     case 'openrouter': {
-      const key = apiKey || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+      const key = apiKey || process.env.OPENROUTER_API_KEY;
       if (!key) {
         console.warn('No OpenRouter API key found, falling back to mock provider');
         return new MockLLMProvider();
@@ -52,7 +52,7 @@ export function createLLMProvider(config?: Partial<LLMConfig>): LLMProvider {
     }
 
     case 'ollama': {
-      const base = baseUrl || process.env.NEXT_PUBLIC_OLLAMA_BASE_URL;
+      const base = baseUrl || process.env.OLLAMA_BASE_URL;
       return new OllamaProvider(model, base);
     }
 
