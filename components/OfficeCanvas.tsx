@@ -7,16 +7,22 @@ export function OfficeCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current || gameRef.current) return;
+    const parent = containerRef.current;
+    if (!parent) return;
 
-    // Dynamic import to avoid SSR issues with Phaser
+    let game: { destroy: (removeCanvas: boolean) => void; scale: { refresh: () => void } } | null = null;
+    let cancelled = false;
+
+    // Dynamic import to avoid SSR issues with Phaser.
+    // A cancelled flag covers React remounts that run before the import resolves.
     const initPhaser = async () => {
       const Phaser = await import('phaser');
       const { OfficeScene } = await import('@/lib/game/OfficeScene');
+      if (cancelled || !containerRef.current) return;
 
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
-        parent: containerRef.current!,
+        parent: containerRef.current,
         width: 800,
         height: 600,
         backgroundColor: '#2d2d2d',
@@ -34,14 +40,25 @@ export function OfficeCanvas() {
         },
       };
 
-      gameRef.current = new Phaser.Game(config);
+      game = new Phaser.Game(config);
+      gameRef.current = game;
+      requestAnimationFrame(() => {
+        if (!cancelled) game?.scale.refresh();
+      });
     };
 
     initPhaser();
 
+    const onResize = () => game?.scale.refresh();
+    window.addEventListener('resize', onResize);
+
     return () => {
-      if (gameRef.current) {
-        gameRef.current.destroy(true);
+      cancelled = true;
+      window.removeEventListener('resize', onResize);
+      if (game) {
+        game.destroy(true);
+      }
+      if (gameRef.current === game) {
         gameRef.current = null;
       }
     };

@@ -9,6 +9,7 @@ export class OfficeScene extends Phaser.Scene {
   private furniture?: Phaser.Physics.Arcade.StaticGroup;
   private interactionText?: Phaser.GameObjects.Text;
   private nearbyAgent: string | null = null;
+  private unsubscribeAgents?: () => void;
 
   constructor() {
     super({ key: 'OfficeScene' });
@@ -77,6 +78,11 @@ export class OfficeScene extends Phaser.Scene {
     graphics.lineStyle(2, 0xffffff, 1);
     graphics.strokeCircle(16, 16, 12);
     graphics.generateTexture('agent', 32, 32);
+    graphics.clear();
+
+    graphics.fillStyle(0x000000, 0);
+    graphics.fillRect(0, 0, 32, 32);
+    graphics.generateTexture('blank', 32, 32);
     
     graphics.destroy();
   }
@@ -110,7 +116,7 @@ export class OfficeScene extends Phaser.Scene {
     if (wallLayer) {
       wallLayer.forEachTile((tile) => {
         if (tile.properties.collides) {
-          const wall = this.walls!.create(tile.x * 32 + 16, tile.y * 32 + 16, '') as Phaser.Physics.Arcade.Sprite;
+          const wall = this.walls!.create(tile.x * 32 + 16, tile.y * 32 + 16, 'blank') as Phaser.Physics.Arcade.Sprite;
           wall.setSize(32, 32);
           wall.setVisible(false);
         }
@@ -120,7 +126,7 @@ export class OfficeScene extends Phaser.Scene {
     if (furnitureLayer) {
       furnitureLayer.forEachTile((tile) => {
         if (tile.properties.collides) {
-          const furn = this.furniture!.create(tile.x * 32 + 16, tile.y * 32 + 16, '') as Phaser.Physics.Arcade.Sprite;
+          const furn = this.furniture!.create(tile.x * 32 + 16, tile.y * 32 + 16, 'blank') as Phaser.Physics.Arcade.Sprite;
           furn.setSize(32, 32);
           furn.setVisible(false);
         }
@@ -135,8 +141,17 @@ export class OfficeScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.walls!);
     this.physics.add.collider(this.player, this.furniture!);
     
-    // Create agents
-    this.createAgents();
+    // Create agents now, and again when Supabase replaces the initial list
+    this.syncAgents();
+    this.unsubscribeAgents = useStore.subscribe((state, prev) => {
+      if (state.agents !== prev.agents) {
+        this.syncAgents();
+      }
+    });
+    this.events.once('shutdown', () => {
+      this.unsubscribeAgents?.();
+      this.unsubscribeAgents = undefined;
+    });
     
     // Set up camera
     this.cameras.main.startFollow(this.player);
@@ -163,11 +178,7 @@ export class OfficeScene extends Phaser.Scene {
     });
   }
 
-  createAgents() {
-    const storeState = useStore.getState();
-    const agents = storeState.agents;
-    
-    // Define positions for different states
+  positionForAgent(agent: { x?: number; y?: number; taskStatus: string }, index: number) {
     const deskPositions = [
       { x: 200, y: 200 },
       { x: 300, y: 200 },
@@ -176,37 +187,57 @@ export class OfficeScene extends Phaser.Scene {
       { x: 200, y: 350 },
       { x: 300, y: 350 },
     ];
-    
     const meetingPosition = { x: 600, y: 400 };
     const loungePosition = { x: 250, y: 450 };
-    
-    agents.forEach((agent, index) => {
-      let position;
-      
-      switch (agent.taskStatus) {
-        case 'working':
-          position = deskPositions[index % deskPositions.length];
-          break;
-        case 'meeting':
-          position = meetingPosition;
-          break;
-        case 'idle':
-        default:
-          position = loungePosition;
-          break;
+
+    // Supabase desk_x/desk_y are tile indexes (2, 4, 6, …). Values already in
+    // pixels, such as 300, are larger than the map and used as-is. Nulls fall through.
+    if (typeof agent.x === 'number' && typeof agent.y === 'number' && Number.isFinite(agent.x) && Number.isFinite(agent.y)) {
+      if (agent.x <= 40 && agent.y <= 40) {
+        return { x: agent.x * 32 + 16, y: agent.y * 32 + 16 };
       }
-      
+      return { x: agent.x, y: agent.y };
+    }
+
+    switch (agent.taskStatus) {
+      case 'working':
+        return deskPositions[index % deskPositions.length];
+      case 'meeting':
+        return meetingPosition;
+      default:
+        return loungePosition;
+    }
+  }
+
+  syncAgents() {
+    const agents = useStore.getState().agents;
+    const seen = new Set<string>();
+
+    agents.forEach((agent, index) => {
+      seen.add(agent.id);
+      const existing = this.agents.get(agent.id);
+      if (existing) {
+        existing.setData('agentName', agent.name);
+        return;
+      }
+
+      const position = this.positionForAgent(agent, index);
       const sprite = this.physics.add.sprite(position.x, position.y, 'agent');
       sprite.setData('agentId', agent.id);
       sprite.setData('agentName', agent.name);
       sprite.setData('targetX', position.x);
       sprite.setData('targetY', position.y);
-      
+
       this.agents.set(agent.id, sprite);
-      
-      // Set up collisions
       this.physics.add.collider(sprite, this.walls!);
       this.physics.add.collider(sprite, this.furniture!);
+    });
+
+    this.agents.forEach((sprite, id) => {
+      if (!seen.has(id)) {
+        sprite.destroy();
+        this.agents.delete(id);
+      }
     });
   }
 
