@@ -29,10 +29,10 @@ export const meetingSpots: TilePoint[] = [
 ];
 
 export const loungeSpots: TilePoint[] = [
-  { x: 4, y: 25 },
-  { x: 13, y: 25 },
-  { x: 25, y: 25 },
-  { x: 34, y: 25 },
+  { x: 5, y: 24 },
+  { x: 10, y: 24 },
+  { x: 29, y: 24 },
+  { x: 35, y: 24 },
 ];
 
 export const playerSpawn: TilePoint = { x: 12, y: 12 };

@@ -274,10 +274,10 @@ NEXT_PUBLIC_SUPABASE_URL=<url> NEXT_PUBLIC_SUPABASE_ANON_KEY=<key> npx tsx scrip
 
 Pixel-art tiles and characters are from Kenney's CC0 packs:
 
-- [Roguelike Indoor](https://kenney.nl/assets/roguelike-indoors) — desks, chairs, tables, plants, benches
+- [Roguelike Indoor](https://kenney.nl/assets/roguelike-indoors) — desks, chairs, tables, plants, counters
 - [RPG Urban Pack](https://kenney.nl/assets/rpg-urban-pack) — wood floor, doors, and the six 4-direction walk-cycle characters
 
-Wall caps, the carpet weave, and the desk monitors are original tiles drawn to match that set. License: [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). Credit Kenney (www.kenney.nl). Avatar ids `green`, `red`, `purple`, `worker`, `beard`, and `band` select those six characters.
+Wall caps, the carpet weave, pantry tiles, rugs, windows, bookshelves, filing cabinets, sofas, lamps, the fridge, the coffee machine, the whiteboard, the TV, and the desk clutter are original tiles drawn to match that set. License: [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). Credit Kenney (www.kenney.nl). Avatar ids `green`, `red`, `purple`, `worker`, `beard`, and `band` select those six characters.
 
 ## License
 
