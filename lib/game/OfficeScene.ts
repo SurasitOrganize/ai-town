@@ -54,6 +54,7 @@ export class OfficeScene extends Phaser.Scene {
     const walls = map.createLayer('Walls', tiles, 0, 0);
     const furniture = map.createLayer('Furniture', tiles, 0, 0);
     floor?.setDepth(0);
+    this.addZoneLabels();
 
     this.blockers = this.physics.add.staticGroup();
     if (walls) this.spawnLayer(walls, (gid) => gid !== 7 && gid !== 8);
@@ -120,6 +121,28 @@ export class OfficeScene extends Phaser.Scene {
         });
       });
     }
+  }
+
+  addZoneLabels() {
+    const zones = [
+      { text: 'Work Area', x: 8, y: 8 },
+      { text: 'Meeting Room', x: 36, y: 4 },
+      { text: 'Pantry', x: 33, y: 17 },
+      { text: 'Lounge', x: 18, y: 21 },
+    ];
+    zones.forEach((zone) => {
+      const pos = tileToWorld(zone);
+      this.add
+        .text(pos.x, pos.y, zone.text, {
+          fontFamily: 'monospace',
+          fontSize: '8px',
+          color: '#3f2a1c',
+          stroke: '#f6ead2',
+          strokeThickness: 2,
+        })
+        .setOrigin(0.5, 0.5)
+        .setDepth(1);
+    });
   }
 
   spawnLayer(layer: Phaser.Tilemaps.TilemapLayer, solid: (gid: number) => boolean) {
