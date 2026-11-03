@@ -25,13 +25,20 @@ export function OfficeCanvas() {
         parent: containerRef.current,
         width: 800,
         height: 600,
-        backgroundColor: '#2d2d2d',
+        backgroundColor: '#1c1915',
+        pixelArt: true,
+        antialias: false,
         physics: {
           default: 'arcade',
           arcade: {
             gravity: { x: 0, y: 0 },
             debug: false,
           },
+        },
+        render: {
+          pixelArt: true,
+          antialias: false,
+          roundPixels: true,
         },
         scene: OfficeScene,
         scale: {
@@ -66,7 +73,7 @@ export function OfficeCanvas() {
 
   return (
     <div className="flex-1 flex items-center justify-center bg-gray-900">
-      <div ref={containerRef} className="w-full h-full" />
+      <div ref={containerRef} className="office-canvas w-full h-full" />
     </div>
   );
 }

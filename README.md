@@ -270,6 +270,15 @@ NEXT_PUBLIC_SUPABASE_URL=<url> NEXT_PUBLIC_SUPABASE_ANON_KEY=<key> npx tsx scrip
 - Custom agent creation
 - Advanced AI capabilities
 
+## Art credits
+
+Pixel-art tiles and characters are from Kenney's CC0 packs:
+
+- [Roguelike Indoor](https://kenney.nl/assets/roguelike-indoors) — desks, chairs, tables, plants, benches
+- [RPG Urban Pack](https://kenney.nl/assets/rpg-urban-pack) — wood floor, doors, and the six 4-direction walk-cycle characters
+
+Wall caps, the carpet weave, and the desk monitors are original tiles drawn to match that set. License: [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). Credit Kenney (www.kenney.nl). Avatar ids `green`, `red`, `purple`, `worker`, `beard`, and `band` select those six characters.
+
 ## License
 
 MIT

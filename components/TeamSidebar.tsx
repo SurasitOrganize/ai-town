@@ -16,6 +16,18 @@ export function TeamSidebar() {
     toggleChat(true);
   };
   
+  const avatarGlyph = (avatar: string) => {
+    const looks: Record<string, string> = {
+      green: '🧑',
+      red: '👩',
+      purple: '👨',
+      worker: '👷',
+      beard: '🧔',
+      band: '🧑‍🎤',
+    };
+    return looks[avatar] || avatar || '🧑';
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'online': return 'bg-green-500';
@@ -42,7 +54,7 @@ export function TeamSidebar() {
             className="p-3 border-b border-gray-700 hover:bg-gray-700 cursor-pointer transition-colors"
           >
             <div className="flex items-center space-x-3">
-              <div className="text-2xl">{agent.avatar}</div>
+              <div className="text-2xl">{avatarGlyph(agent.avatar)}</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2">
                   <p className="text-white font-medium truncate">{agent.name}</p>
