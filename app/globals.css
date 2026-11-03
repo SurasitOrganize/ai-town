@@ -20,6 +20,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.office-canvas canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

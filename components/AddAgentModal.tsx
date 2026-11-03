@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { agentRepository } from '@/lib/repository/supabase';
+import { useStore } from '@/lib/store';
+import { emptyDesk, worldToTile } from '@/lib/game/officeLayout';
 
 interface AddAgentModalProps {
   isOpen: boolean;
@@ -21,9 +23,16 @@ export function AddAgentModal({ isOpen, onClose }: AddAgentModalProps) {
     { id: 'slack', label: 'Slack' },
   ];
 
-  const avatars = ['👨‍💻', '👩‍💻', '👨‍🎨', '👩‍🎨', '👨‍💼', '👩‍💼', '🤖', '🦾', '🧠'];
+  const avatars = [
+    { id: 'green', label: 'Green' },
+    { id: 'red', label: 'Red' },
+    { id: 'purple', label: 'Violet' },
+    { id: 'worker', label: 'Cap' },
+    { id: 'beard', label: 'Beard' },
+    { id: 'band', label: 'Band' },
+  ];
 
-  const [selectedAvatar, setSelectedAvatar] = useState(avatars[0]);
+  const [selectedAvatar, setSelectedAvatar] = useState(avatars[0].id);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,17 +51,18 @@ export function AddAgentModal({ isOpen, onClose }: AddAgentModalProps) {
     setIsSubmitting(true);
 
     try {
-      // Find an available desk position (simple logic for now)
-      const deskX = Math.floor(Math.random() * 5) * 100 + 200;
-      const deskY = Math.floor(Math.random() * 2) * 150 + 200;
+      const occupied = useStore.getState().agents
+        .map((agent) => worldToTile(agent.x ?? Number.NaN, agent.y ?? Number.NaN))
+        .filter((point): point is { x: number; y: number } => point !== null);
+      const desk = emptyDesk(occupied);
 
       await agentRepository.create({
         name: name.trim(),
         role: role.trim(),
         status: 'online',
         taskStatus: 'idle',
-        x: deskX,
-        y: deskY,
+        x: desk.x,
+        y: desk.y,
         avatar: selectedAvatar,
       });
 
@@ -60,7 +70,7 @@ export function AddAgentModal({ isOpen, onClose }: AddAgentModalProps) {
       setName('');
       setRole('');
       setSelectedTools([]);
-      setSelectedAvatar(avatars[0]);
+      setSelectedAvatar(avatars[0].id);
       
       onClose();
     } catch (err: any) {
@@ -136,17 +146,17 @@ export function AddAgentModal({ isOpen, onClose }: AddAgentModalProps) {
             <div className="flex flex-wrap gap-2">
               {avatars.map((avatar) => (
                 <button
-                  key={avatar}
+                  key={avatar.id}
                   type="button"
-                  onClick={() => setSelectedAvatar(avatar)}
-                  className={`text-2xl p-2 rounded transition-colors ${
-                    selectedAvatar === avatar
-                      ? 'bg-blue-600'
-                      : 'bg-gray-700 hover:bg-gray-600'
+                  onClick={() => setSelectedAvatar(avatar.id)}
+                  className={`text-sm px-3 py-2 rounded transition-colors ${
+                    selectedAvatar === avatar.id
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
                   }`}
                   disabled={isSubmitting}
                 >
-                  {avatar}
+                  {avatar.label}
                 </button>
               ))}
             </div>
