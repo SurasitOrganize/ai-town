@@ -17,22 +17,19 @@ export class OfficeScene extends Phaser.Scene {
   preload() {
     // Load the tilemap
     this.load.tilemapTiledJSON('office', '/assets/office-map.json');
-    
-    // Create simple colored rectangles as placeholder tiles
-    this.createPlaceholderTiles();
   }
 
   createPlaceholderTiles() {
     // Create placeholder graphics
     const graphics = this.add.graphics();
     
-    // Floor tile (light gray)
+    // Floor tile (light gray) - single tile
     graphics.fillStyle(0xe0e0e0, 1);
     graphics.fillRect(0, 0, 32, 32);
     graphics.generateTexture('floor', 32, 32);
     graphics.clear();
     
-    // Wall tile (dark gray)
+    // Wall tile (dark gray) - single tile
     graphics.fillStyle(0x4a4a4a, 1);
     graphics.fillRect(0, 0, 32, 32);
     graphics.lineStyle(2, 0x2a2a2a, 1);
@@ -40,36 +37,30 @@ export class OfficeScene extends Phaser.Scene {
     graphics.generateTexture('wall', 32, 32);
     graphics.clear();
     
-    // Desk tile (brown)
+    // Furniture tileset - 5 tiles in a horizontal strip (160x32)
+    // Tile 0: Desk (brown)
     graphics.fillStyle(0x8b4513, 1);
     graphics.fillRect(0, 0, 32, 32);
     graphics.lineStyle(2, 0x654321, 1);
     graphics.strokeRect(0, 0, 32, 32);
-    graphics.generateTexture('desk', 32, 32);
-    graphics.clear();
     
-    // Chair tile (blue)
+    // Tile 1: Chair (blue)
     graphics.fillStyle(0x4169e1, 1);
-    graphics.fillRect(4, 4, 24, 24);
-    graphics.generateTexture('chair', 32, 32);
-    graphics.clear();
+    graphics.fillRect(32 + 4, 4, 24, 24);
     
-    // Plant tile (green)
+    // Tile 2: Plant (green)
     graphics.fillStyle(0x228b22, 1);
-    graphics.fillCircle(16, 16, 12);
-    graphics.generateTexture('plant', 32, 32);
-    graphics.clear();
+    graphics.fillCircle(64 + 16, 16, 12);
     
-    // Meeting table (darker brown)
+    // Tile 3: Meeting table (darker brown)
     graphics.fillStyle(0x654321, 1);
-    graphics.fillRect(0, 0, 32, 32);
-    graphics.generateTexture('meeting-table', 32, 32);
-    graphics.clear();
+    graphics.fillRect(96, 0, 32, 32);
     
-    // Sofa (red)
+    // Tile 4: Sofa (red)
     graphics.fillStyle(0xdc143c, 1);
-    graphics.fillRect(0, 0, 32, 32);
-    graphics.generateTexture('sofa', 32, 32);
+    graphics.fillRect(128, 0, 32, 32);
+    
+    graphics.generateTexture('furniture', 160, 32);
     graphics.clear();
     
     // Create player sprite (blue circle)
@@ -91,13 +82,16 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   create() {
+    // Create placeholder tiles first
+    this.createPlaceholderTiles();
+    
     // Create the tilemap
     const map = this.make.tilemap({ key: 'office' });
     
     // Add tilesets
     const floorTileset = map.addTilesetImage('floor', 'floor');
     const wallTileset = map.addTilesetImage('wall', 'wall');
-    const furnitureTileset = map.addTilesetImage('furniture', 'desk');
+    const furnitureTileset = map.addTilesetImage('furniture', 'furniture');
     
     // Create layers
     const floorLayer = map.createLayer('Floor', floorTileset!, 0, 0);
